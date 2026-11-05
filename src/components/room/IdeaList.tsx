@@ -97,13 +97,23 @@ function IdeaRow({ idea, me, dispatch }: IdeaRowProps) {
         {count}
       </button>
       <span className="min-w-0 flex-1 break-words pt-0.5 text-[15px]">{idea.text}</span>
-      <button
-        type="button"
-        onClick={() => dispatch({ type: "idea/lock", id: idea.id })}
-        className="reveal shrink-0 pt-0.5 text-xs text-mute opacity-0 transition-opacity hover:text-ink focus-visible:opacity-100 group-hover:opacity-100"
-      >
-        Lock in
-      </button>
+      <div className="flex shrink-0 gap-3 pt-0.5 text-xs">
+        <button
+          type="button"
+          aria-label={`Delete idea: ${idea.text}`}
+          onClick={() => dispatch({ type: "idea/remove", id: idea.id })}
+          className="reveal text-mute opacity-0 transition-opacity hover:text-signal focus-visible:opacity-100 group-hover:opacity-100"
+        >
+          Delete
+        </button>
+        <button
+          type="button"
+          onClick={() => dispatch({ type: "idea/lock", id: idea.id })}
+          className="reveal text-mute opacity-0 transition-opacity hover:text-ink focus-visible:opacity-100 group-hover:opacity-100"
+        >
+          Lock in
+        </button>
+      </div>
     </li>
   );
 }
