@@ -84,6 +84,11 @@ body {
   border-radius: 2px;
 }
 
+/* Text fields show focus with their underline turning ink, so no ring. */
+input:focus-visible {
+  outline: none;
+}
+
 input::placeholder {
   color: var(--mute);
   opacity: 1;
