@@ -7,6 +7,7 @@ import { useNow } from "@/hooks/useNow";
 import { defaultDeadline, fromLocalInput, toLocalInput } from "@/lib/datetime";
 import { saveMe, type RecentRoom } from "@/lib/identity";
 import { roomId } from "@/lib/room/ids";
+import { JUNCTION_2026, presetMilestoneId } from "@/lib/room/junction";
 import { countdown } from "@/lib/room/time";
 import { LIMITS } from "@/lib/room/types";
 import { sync } from "@/lib/sync";
@@ -30,6 +31,7 @@ function CreateRoomForm() {
   const [name, setName] = useState("");
   const [deadlineInput, setDeadlineInput] = useState(() => toLocalInput(defaultDeadline(Date.now())));
   const [renaming, setRenaming] = useState(false);
+  const [junction, setJunction] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,6 +50,11 @@ function CreateRoomForm() {
       const id = roomId();
       await sync.append(id, { type: "room/create", name: team.trim(), deadline, at: Date.now() });
       await sync.append(id, { type: "member/upsert", member: me });
+      if (junction && deadline === JUNCTION_2026.deadline) {
+        for (const [i, m] of JUNCTION_2026.milestones.entries()) {
+          await sync.append(id, { type: "milestone/add", id: presetMilestoneId(i), label: m.label, at: m.at });
+        }
+      }
       router.push(`/r/${id}`);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Could not create the room.");
@@ -93,7 +100,10 @@ function CreateRoomForm() {
               id="deadline"
               type="datetime-local"
               value={deadlineInput}
-              onChange={(e) => setDeadlineInput(e.target.value)}
+              onChange={(e) => {
+                setDeadlineInput(e.target.value);
+                setJunction(false);
+              }}
               className={fieldClass}
             />
           </Field>
@@ -131,6 +141,35 @@ function CreateRoomForm() {
             Start the clock
           </button>
         </form>
+        <p className="mt-5 text-sm text-mute">
+          {junction ? (
+            <>
+              <span className="text-ink">{JUNCTION_2026.label} schedule added</span>: deadline Sun
+              10:00 Helsinki time, plus {JUNCTION_2026.milestones.length} milestones.{" "}
+              <button
+                type="button"
+                onClick={() => {
+                  setJunction(false);
+                  setDeadlineInput(toLocalInput(defaultDeadline(Date.now())));
+                }}
+                className="underline underline-offset-4 hover:text-ink"
+              >
+                Undo
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                setJunction(true);
+                setDeadlineInput(toLocalInput(JUNCTION_2026.deadline));
+              }}
+              className="underline-offset-4 hover:text-ink hover:underline"
+            >
+              Going to {JUNCTION_2026.label}? Use its schedule
+            </button>
+          )}
+        </p>
         {error ? <p className="mt-4 text-sm text-signal">{error}</p> : null}
         {preview?.phase === "over" ? (
           <p className="mt-4 text-sm text-signal">That deadline has already passed.</p>

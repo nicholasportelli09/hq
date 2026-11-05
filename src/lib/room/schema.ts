@@ -21,6 +21,13 @@ const actionSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("idea/vote"), id, memberId: id, on: z.boolean() }),
   z.object({ type: z.literal("idea/remove"), id }),
   z.object({ type: z.literal("idea/lock"), id: id.nullable() }),
+  z.object({ type: z.literal("milestone/add"), id, label: text(LIMITS.milestoneLabel), at: time }),
+  z.object({ type: z.literal("milestone/remove"), id }),
+  z.object({
+    type: z.literal("checklist/set"),
+    item: z.string().min(1).max(LIMITS.checklistItemId),
+    done: z.boolean(),
+  }),
 ]);
 
 /** Validate anything that arrives from storage or the network. */

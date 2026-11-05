@@ -29,3 +29,21 @@ const dueFormat = new Intl.DateTimeFormat(undefined, {
 });
 
 export const formatDue = (ms: number): string => dueFormat.format(ms);
+
+const shortFormat = new Intl.DateTimeFormat(undefined, {
+  weekday: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+/** "Sat 13:00" — for milestones inside a weekend. */
+export const formatShort = (ms: number): string => shortFormat.format(ms);
+
+/** "in 3h 20m", "in 12m", "now". */
+export function formatIn(ms: number): string {
+  const minutes = Math.max(0, Math.round(ms / 60_000));
+  if (minutes === 0) return "now";
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return h > 0 ? `in ${h}h ${String(m).padStart(2, "0")}m` : `in ${m}m`;
+}

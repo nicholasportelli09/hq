@@ -52,10 +52,14 @@ body {
   }
 }
 
-/* The big countdown. "00:00:00" is ~3.92em wide in this face, so this
+/* The big countdown. "00:00:00" is ~3.92em wide in this face, and each
+   extra hour digit (100h+ before a far-off deadline) adds ~0.6em, so this
    makes the clock span the full content width at every viewport. */
 .clock {
-  font-size: calc((min(100vw, var(--page-max)) - 2 * var(--gutter)) / 3.96);
+  --extra-digits: 0;
+  font-size: calc(
+    (min(100vw, var(--page-max)) - 2 * var(--gutter)) / (3.96 + var(--extra-digits) * 0.6)
+  );
   font-weight: 500;
   line-height: 0.82;
   letter-spacing: -0.05em;

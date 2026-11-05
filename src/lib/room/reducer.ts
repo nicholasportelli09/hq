@@ -36,6 +36,8 @@ export function apply(room: Room | null, action: Action): Room | null {
       members: {},
       tasks: [],
       ideas: [],
+      milestones: [],
+      checked: [],
     };
   }
   if (!room) return null;
@@ -85,6 +87,26 @@ export function apply(room: Room | null, action: Action): Room | null {
     case "idea/lock":
       if (action.id !== null && !room.ideas.some((i) => i.id === action.id)) return room;
       return { ...room, lockedIdeaId: action.id };
+    case "milestone/add":
+      if (room.milestones.some((m) => m.id === action.id)) return room;
+      return {
+        ...room,
+        milestones: [...room.milestones, { id: action.id, label: action.label, at: action.at }].sort(
+          (a, b) => a.at - b.at,
+        ),
+      };
+    case "milestone/remove":
+      return { ...room, milestones: room.milestones.filter((m) => m.id !== action.id) };
+    case "checklist/set": {
+      const has = room.checked.includes(action.item);
+      if (action.done === has) return room;
+      return {
+        ...room,
+        checked: action.done
+          ? [...room.checked, action.item]
+          : room.checked.filter((c) => c !== action.item),
+      };
+    }
   }
 }
 

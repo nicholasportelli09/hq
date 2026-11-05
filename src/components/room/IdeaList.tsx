@@ -12,12 +12,14 @@ interface IdeaListProps {
   members: Readonly<Record<string, Member>>;
   me: Member;
   dispatch: (action: Action) => void;
+  /** Deleting goes through the room so it can offer undo. */
+  onRemove: (idea: Idea) => void;
 }
 
 const byVotes = (a: Idea, b: Idea) =>
   b.voterIds.length - a.voterIds.length || a.createdAt - b.createdAt;
 
-export function IdeaList({ ideas, lockedIdeaId, members, me, dispatch }: IdeaListProps) {
+export function IdeaList({ ideas, lockedIdeaId, members, me, dispatch, onRemove }: IdeaListProps) {
   const locked = ideas.find((i) => i.id === lockedIdeaId);
 
   if (locked) {
@@ -68,7 +70,7 @@ export function IdeaList({ ideas, lockedIdeaId, members, me, dispatch }: IdeaLis
       ) : (
         <ul>
           {sorted.map((idea) => (
-            <IdeaRow key={idea.id} idea={idea} me={me} dispatch={dispatch} />
+            <IdeaRow key={idea.id} idea={idea} me={me} dispatch={dispatch} onRemove={onRemove} />
           ))}
         </ul>
       )}
@@ -80,9 +82,10 @@ interface IdeaRowProps {
   idea: Idea;
   me: Member;
   dispatch: (action: Action) => void;
+  onRemove: (idea: Idea) => void;
 }
 
-function IdeaRow({ idea, me, dispatch }: IdeaRowProps) {
+function IdeaRow({ idea, me, dispatch, onRemove }: IdeaRowProps) {
   const voted = idea.voterIds.includes(me.id);
   const count = idea.voterIds.length;
   return (
@@ -101,8 +104,8 @@ function IdeaRow({ idea, me, dispatch }: IdeaRowProps) {
         <button
           type="button"
           aria-label={`Delete idea: ${idea.text}`}
-          onClick={() => dispatch({ type: "idea/remove", id: idea.id })}
-          className="reveal text-mute opacity-0 transition-opacity hover:text-signal focus-visible:opacity-100 group-hover:opacity-100"
+          onClick={() => onRemove(idea)}
+          className="reveal text-mute opacity-0 transition-opacity hover:text-ink focus-visible:opacity-100 group-hover:opacity-100"
         >
           Delete
         </button>

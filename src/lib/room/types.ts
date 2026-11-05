@@ -3,6 +3,8 @@ export const LIMITS = {
   memberName: 32,
   taskText: 200,
   ideaText: 160,
+  milestoneLabel: 40,
+  checklistItemId: 32,
 } as const;
 
 export type Member = Readonly<{
@@ -26,6 +28,12 @@ export type Idea = Readonly<{
   createdAt: number;
 }>;
 
+export type Milestone = Readonly<{
+  id: string;
+  label: string;
+  at: number;
+}>;
+
 export type Room = Readonly<{
   name: string;
   createdAt: number;
@@ -34,6 +42,9 @@ export type Room = Readonly<{
   members: Readonly<Record<string, Member>>;
   tasks: readonly Task[];
   ideas: readonly Idea[];
+  milestones: readonly Milestone[];
+  /** Ids of submission-checklist items the team has ticked. */
+  checked: readonly string[];
 }>;
 
 /**
@@ -53,4 +64,7 @@ export type Action =
   | { type: "idea/add"; id: string; text: string; authorId: string; at: number }
   | { type: "idea/vote"; id: string; memberId: string; on: boolean }
   | { type: "idea/remove"; id: string }
-  | { type: "idea/lock"; id: string | null };
+  | { type: "idea/lock"; id: string | null }
+  | { type: "milestone/add"; id: string; label: string; at: number }
+  | { type: "milestone/remove"; id: string }
+  | { type: "checklist/set"; item: string; done: boolean };

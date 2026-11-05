@@ -4,16 +4,19 @@ import { useState } from "react";
 import { useNow } from "@/hooks/useNow";
 import { formatDue, fromLocalInput, toLocalInput } from "@/lib/datetime";
 import { countdown, progress } from "@/lib/room/time";
+import type { Milestone } from "@/lib/room/types";
 import { ClockDigits } from "./ClockDigits";
+import { MilestoneTrack } from "./MilestoneTrack";
 
 interface ClockProps {
   start: number;
   deadline: number;
+  milestones: readonly Milestone[];
   onDeadlineChange: (deadline: number) => void;
+  onManageMilestones: () => void;
 }
 
-
-export function Clock({ start, deadline, onDeadlineChange }: ClockProps) {
+export function Clock({ start, deadline, milestones, onDeadlineChange, onManageMilestones }: ClockProps) {
   const now = useNow();
   const [editing, setEditing] = useState(false);
   const c = now === null ? null : countdown(deadline, now);
@@ -48,12 +51,15 @@ export function Clock({ start, deadline, onDeadlineChange }: ClockProps) {
 
       <ClockDigits value={c} hot={hot} className="mt-2 select-none" />
 
-      <div className="mt-6 h-px w-full bg-line" aria-hidden>
-        <div
-          className={`h-px origin-left transition-transform duration-1000 ease-linear ${hot ? "bg-signal" : "bg-ink"}`}
-          style={{ transform: `scaleX(${share})` }}
-        />
-      </div>
+      <MilestoneTrack
+        start={start}
+        deadline={deadline}
+        now={now}
+        share={share}
+        hot={hot}
+        milestones={milestones}
+        onManage={onManageMilestones}
+      />
     </section>
   );
 }

@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import type { Countdown } from "@/lib/room/time";
 
 interface ClockDigitsProps {
@@ -17,6 +18,7 @@ export function ClockDigits({ value, hot = false, className = "", decorative = f
   const v = value ?? ZERO;
   const live = value !== null && !decorative;
   const tone = value === null ? "text-line" : hot ? "text-signal" : "text-ink";
+  const fit = { "--extra-digits": Math.max(0, v.hours.length - 2) } as CSSProperties;
 
   return (
     <p
@@ -24,6 +26,7 @@ export function ClockDigits({ value, hot = false, className = "", decorative = f
       aria-hidden={live ? undefined : true}
       aria-label={live ? `${Number(v.hours)} hours, ${Number(v.minutes)} minutes left` : undefined}
       className={`clock transition-colors duration-700 ${tone} ${className}`}
+      style={fit}
     >
       <span className="digits">{v.hours}</span>
       <Colon />
