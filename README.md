@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# hq
 
-## Getting Started
+A countdown, a task list and a vote. One page a hackathon team shares live. No accounts: make a room, send the link.
 
-First, run the development server:
+- **Clock**: big countdown to the submission deadline; turns orange in the final hour.
+- **Tasks**: one list. Claim with your initials, tick when done.
+- **Ideas**: everyone pitches, everyone votes, lock in the winner.
+
+Keyboard: `N` new task · `I` new idea · `J/K` move · `X` done · `C` claim · `⌫` delete · `?` help.
+
+## Run it
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+With no configuration it runs in **demo mode**: rooms live in this browser and sync between its tabs.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Live sync across devices (Supabase)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Create a Supabase project and run `supabase/migrations/0001_room_events.sql` in the SQL editor.
+2. Copy `.env.example` to `.env.local` and fill in the project URL and anon (publishable) key.
+3. Restart `npm run dev`.
 
-## Learn More
+Rooms are an append-only event log. Clients can only read or append a room through two RPCs, so knowing the room link is what grants access.
 
-To learn more about Next.js, take a look at the following resources:
+## Checks
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm test          # unit tests (state logic)
+npm run e2e       # Playwright: create a room, sync to a second tab
+npm run typecheck
+npm run lint
+```
