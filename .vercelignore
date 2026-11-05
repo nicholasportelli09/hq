@@ -1,0 +1,9 @@
+# Never upload these from a local `vercel deploy`.
+node_modules
+node_modules.nosync
+.next
+.env*
+test-results
+playwright-report
+blob-report
+gauntlet
