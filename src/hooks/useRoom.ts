@@ -63,7 +63,7 @@ export function useRoom(roomId: string, me: Member | null): UseRoom {
           setLog((prev) => (prev ? [...prev, action] : prev));
         },
         onPresence: setOnline,
-        onReconnect: () => void reload(),
+        onLive: () => void reload(),
       });
     }
     void reload();

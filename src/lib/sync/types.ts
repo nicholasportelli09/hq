@@ -4,8 +4,11 @@ export interface ConnectionHandlers {
   onAction: (action: Action) => void;
   /** Ids of members currently online, including yourself. */
   onPresence: (memberIds: readonly string[]) => void;
-  /** Fired after a dropped connection comes back, so the caller can resync. */
-  onReconnect: () => void;
+  /**
+   * Fired each time the live channel (re)connects. Changes made before that
+   * moment may have been missed, so the caller should resync.
+   */
+  onLive: () => void;
 }
 
 export interface RoomConnection {

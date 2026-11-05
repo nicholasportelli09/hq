@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { parseAction, parseActions } from "@/lib/room/schema";
-import type { Member } from "@/lib/room/types";
+import type { Action, Member } from "@/lib/room/types";
 import type { ConnectionHandlers, RoomConnection, SyncAdapter } from "./types";
 
 /**
@@ -31,7 +31,20 @@ export function createSupabaseAdapter(url: string, key: string): SyncAdapter {
       const channel = client.channel(`room:${roomId}`, {
         config: { broadcast: { self: false }, presence: { key: me.id } },
       });
-      let subscribedOnce = false;
+      // Sends go out strictly in dispatch order. Undo, for example, sends
+      // "add task" then "set owner"; out of order, the owner would be lost.
+      let queue: Promise<void> = Promise.resolve();
+
+      const send = async (action: Action) => {
+        await adapter.append(roomId, action);
+        // Saved is what matters; the broadcast is best-effort. Teammates who
+        // miss it pick the change up on their next resync.
+        try {
+          await channel.send({ type: "broadcast", event: "action", payload: action });
+        } catch {
+          /* best-effort */
+        }
+      };
 
       channel
         .on("broadcast", { event: "action" }, ({ payload }) => {
@@ -44,20 +57,15 @@ export function createSupabaseAdapter(url: string, key: string): SyncAdapter {
         .subscribe((status) => {
           if (status !== "SUBSCRIBED") return;
           void channel.track({ at: Date.now() });
-          if (subscribedOnce) handlers.onReconnect();
-          subscribedOnce = true;
+          // Anything sent before this moment never reached us live: resync.
+          handlers.onLive();
         });
 
       return {
-        async publish(action) {
-          await adapter.append(roomId, action);
-          // Saved is what matters; the broadcast is best-effort. Teammates who
-          // miss it pick the change up on their next resync.
-          try {
-            await channel.send({ type: "broadcast", event: "action", payload: action });
-          } catch {
-            /* best-effort */
-          }
+        publish(action) {
+          const sent = queue.then(() => send(action));
+          queue = sent.catch(() => undefined); // one failure must not block later sends
+          return sent;
         },
         close() {
           void client.removeChannel(channel);
