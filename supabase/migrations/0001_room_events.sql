@@ -82,5 +82,7 @@ $$;
 
 revoke all on function public.hq_load(text) from public;
 revoke all on function public.hq_append(text, jsonb) from public;
-grant execute on function public.hq_load(text) to anon, authenticated;
-grant execute on function public.hq_append(text, jsonb) to anon, authenticated;
+revoke all on function public.hq_load(text) from authenticated;
+revoke all on function public.hq_append(text, jsonb) from authenticated;
+grant execute on function public.hq_load(text) to anon;
+grant execute on function public.hq_append(text, jsonb) to anon;

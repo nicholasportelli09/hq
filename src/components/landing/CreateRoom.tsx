@@ -66,7 +66,7 @@ function CreateRoomForm() {
         <p className="text-sm text-mute">
           {preview ? "Your team will have" : " "}
         </p>
-        <ClockDigits value={preview} className="mt-2" />
+        <ClockDigits value={preview} decorative className="mt-2" />
         <div className="mt-6 h-px w-full bg-ink" />
 
         <form

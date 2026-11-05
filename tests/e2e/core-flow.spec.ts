@@ -43,6 +43,7 @@ test("the shortcuts sheet opens with ? and closes with Escape", async ({ page })
   await page.getByLabel("Team").fill("Keys");
   await page.getByLabel("Your name").fill("Grace Hopper");
   await page.getByRole("button", { name: "Start the clock" }).click();
+  await expect(page).toHaveURL(/\/r\/[a-z0-9]{12}$/);
   await expect(page.getByRole("timer")).toBeVisible();
 
   await page.keyboard.press("?");
