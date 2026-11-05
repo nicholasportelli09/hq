@@ -16,7 +16,11 @@ import { focusTaskRow, TASK_INPUT_ID, TaskList } from "./TaskList";
 
 const focusInput = (id: string) => document.getElementById(id)?.focus();
 
-export function RoomView({ roomId }: { roomId: string }) {
+interface RoomViewProps {
+  roomId: string;
+}
+
+export function RoomView({ roomId }: RoomViewProps) {
   const stored = useMe();
   const me = stored ?? null;
   const [helpOpen, setHelpOpen] = useState(false);

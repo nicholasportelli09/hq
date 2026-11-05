@@ -18,10 +18,12 @@ export function useHotkeys(map: HotkeyMap): void {
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
+      if (document.querySelector("dialog[open]")) return; // let the dialog own the keyboard
       if (event.key !== "Escape" && isTyping(event.target)) return;
       const handler = ref.current[event.key];
       if (!handler) return;
-      event.preventDefault();
+      // Never swallow Escape: native controls rely on it.
+      if (event.key !== "Escape") event.preventDefault();
       handler(event);
     };
     window.addEventListener("keydown", onKey);

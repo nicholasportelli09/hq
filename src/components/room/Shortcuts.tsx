@@ -35,7 +35,17 @@ export function Shortcuts({ open, onClose }: ShortcutsProps) {
       className="m-auto w-[min(22rem,calc(100vw-2rem))] rounded-lg border border-line bg-paper p-0 text-ink shadow-[0_24px_60px_-20px_rgb(0_0_0/0.35)] backdrop:bg-ink/20"
     >
       <div className="p-6">
-        <h2 className="text-sm font-semibold">Keyboard</h2>
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-sm font-semibold">Keyboard</h2>
+          <button
+            type="button"
+            autoFocus
+            onClick={onClose}
+            className="text-sm text-mute hover:text-ink"
+          >
+            Close
+          </button>
+        </div>
         <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2.5 text-sm">
           {SHORTCUTS.map(([key, label]) => (
             <div key={key} className="contents">

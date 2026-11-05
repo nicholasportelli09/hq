@@ -51,7 +51,13 @@ export function createSupabaseAdapter(url: string, key: string): SyncAdapter {
       return {
         async publish(action) {
           await adapter.append(roomId, action);
-          await channel.send({ type: "broadcast", event: "action", payload: action });
+          // Saved is what matters; the broadcast is best-effort. Teammates who
+          // miss it pick the change up on their next resync.
+          try {
+            await channel.send({ type: "broadcast", event: "action", payload: action });
+          } catch {
+            /* best-effort */
+          }
         },
         close() {
           void client.removeChannel(channel);

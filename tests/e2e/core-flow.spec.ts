@@ -38,6 +38,25 @@ test("a team creates a room and changes sync live to a teammate's tab", async ({
   await expect(host.getByText("0 open · 1 done")).toBeVisible();
 });
 
+test("the shortcuts sheet opens with ? and closes with Escape", async ({ page }) => {
+  await page.goto("/");
+  await page.getByLabel("Team").fill("Keys");
+  await page.getByLabel("Your name").fill("Grace Hopper");
+  await page.getByRole("button", { name: "Start the clock" }).click();
+  await expect(page.getByRole("timer")).toBeVisible();
+
+  await page.keyboard.press("?");
+  const sheet = page.getByRole("dialog");
+  await expect(sheet).toBeVisible();
+
+  // Shortcuts must not fire behind the open sheet
+  await page.keyboard.press("n");
+  await expect(page.getByLabel("New task")).not.toBeFocused();
+
+  await page.keyboard.press("Escape");
+  await expect(sheet).toBeHidden();
+});
+
 test("an invalid room link shows a not-found page", async ({ page }) => {
   await page.goto("/r/not-a-room");
   await expect(page.getByRole("heading", { name: "No room here." })).toBeVisible();

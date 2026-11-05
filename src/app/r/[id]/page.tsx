@@ -14,5 +14,5 @@ export default function RoomPage({ params }: PageProps<"/r/[id]">) {
 async function Room({ params }: { params: PageProps<"/r/[id]">["params"] }) {
   const { id } = await params;
   if (!isRoomId(id)) notFound();
-  return <RoomView roomId={id} />;
+  return <RoomView key={id} roomId={id} />;
 }

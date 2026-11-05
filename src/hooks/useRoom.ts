@@ -26,33 +26,44 @@ export function useRoom(roomId: string, me: Member | null): UseRoom {
   const [online, setOnline] = useState<readonly string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const connection = useRef<RoomConnection | null>(null);
+  /** Local actions dispatched but not yet confirmed saved. */
+  const pending = useRef<readonly Action[]>([]);
   const meId = me?.id;
   const meName = me?.name;
 
   useEffect(() => {
     let cancelled = false;
-    let buffered: Action[] = [];
-    let loaded = false;
+    let latestRequest = 0;
+    /** Live actions received while a reload is in flight; null when none is. */
+    let inFlight: Action[] | null = null;
+    pending.current = [];
 
-    const reload = () =>
-      sync
+    // Replace the log with the server snapshot, then re-apply anything that
+    // arrived or was dispatched meanwhile. The reducer is idempotent, so a
+    // re-applied action that the snapshot already contains is harmless.
+    const reload = () => {
+      const request = ++latestRequest;
+      inFlight = [];
+      return sync
         .load(roomId)
         .then((actions) => {
-          if (cancelled) return;
-          loaded = true;
-          setLog([...actions, ...buffered]);
-          buffered = [];
+          if (cancelled || request !== latestRequest) return; // a newer reload wins
+          setLog([...actions, ...(inFlight ?? []), ...pending.current]);
+          inFlight = null;
         })
-        .catch((e: unknown) => !cancelled && setError(message(e)));
+        .catch((e: unknown) => {
+          if (!cancelled && request === latestRequest) setError(message(e));
+        });
+    };
 
     if (meId && meName) {
       connection.current = sync.connect(roomId, { id: meId, name: meName }, {
         onAction: (action) => {
-          if (!loaded) buffered = [...buffered, action];
-          else setLog((prev) => [...(prev ?? []), action]);
+          if (inFlight) inFlight = [...inFlight, action];
+          setLog((prev) => (prev ? [...prev, action] : prev));
         },
         onPresence: setOnline,
-        onReconnect: reload,
+        onReconnect: () => void reload(),
       });
     }
     void reload();
@@ -71,10 +82,24 @@ export function useRoom(roomId: string, me: Member | null): UseRoom {
   const dispatch = useCallback(
     (action: Action) => {
       setLog((prev) => [...(prev ?? []), action]);
+      pending.current = [...pending.current, action];
+      const settle = () => {
+        pending.current = pending.current.filter((a) => a !== action);
+      };
       const publish = connection.current
         ? connection.current.publish(action)
         : sync.append(roomId, action);
-      publish.then(() => setError(null)).catch((e: unknown) => setError(message(e)));
+      publish
+        .then(() => {
+          settle();
+          setError(null);
+        })
+        .catch((e: unknown) => {
+          // Roll back: drop the unsaved action and let replay rebuild state.
+          settle();
+          setLog((prev) => (prev ? prev.filter((a) => a !== action) : prev));
+          setError(message(e));
+        });
     },
     [roomId],
   );
