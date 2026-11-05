@@ -94,6 +94,57 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
 }
 
+/* List rows: the hover wash bleeds slightly past the column so text stays
+   aligned with the headings, while the divider lines stay exactly in the column. */
+.row {
+  position: relative;
+  isolation: isolate;
+  border-bottom: 1px solid var(--line);
+}
+
+.row::before {
+  content: "";
+  position: absolute;
+  inset: 0 -0.5rem;
+  z-index: -1;
+  border-radius: 4px;
+  background: var(--raise);
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+}
+
+.row:hover::before {
+  opacity: 0.6;
+}
+
+.row:focus-visible,
+.row:focus-within {
+  outline: none;
+}
+
+.row:focus-visible::before,
+.row:focus-within::before {
+  opacity: 1;
+}
+
+/* Keyboard focus: a short signal-orange tick instead of a box. */
+.row:focus-visible::after {
+  content: "";
+  position: absolute;
+  left: -0.5rem;
+  top: 30%;
+  bottom: 30%;
+  width: 2px;
+  background: var(--signal);
+}
+
+/* Actions that appear on hover are always visible on touch screens. */
+@media (hover: none) {
+  .reveal {
+    opacity: 1 !important;
+  }
+}
+
 @keyframes rise {
   from {
     opacity: 0;

@@ -106,7 +106,7 @@ function TaskRow({ task, owner, me, dispatch }: TaskRowProps) {
       tabIndex={0}
       onKeyDown={onKeyDown}
       aria-label={`${task.text}${task.done ? ", done" : ""}${owner ? `, ${owner.name}` : ""}`}
-      className="animate-rise group -mx-2 flex items-center gap-3 border-b border-line px-2 py-2.5 outline-none focus-visible:bg-raise focus-visible:outline-none hover:bg-raise/60"
+      className="row animate-rise group flex items-center gap-3 py-2.5"
     >
       <button
         type="button"
@@ -134,7 +134,7 @@ function TaskRow({ task, owner, me, dispatch }: TaskRowProps) {
         type="button"
         tabIndex={-1}
         onClick={(e) => remove(e.currentTarget.closest("li") as HTMLElement)}
-        className="text-xs text-mute opacity-0 transition-opacity hover:text-signal group-hover:opacity-100 group-focus-visible:opacity-100"
+        className="reveal text-xs text-mute opacity-0 transition-opacity hover:text-signal group-hover:opacity-100 group-focus-visible:opacity-100"
       >
         Delete
       </button>

@@ -86,7 +86,7 @@ function IdeaRow({ idea, me, dispatch }: IdeaRowProps) {
   const voted = idea.voterIds.includes(me.id);
   const count = idea.voterIds.length;
   return (
-    <li className="animate-rise group -mx-2 flex items-start gap-3 border-b border-line px-2 py-2.5 hover:bg-raise/60 focus-within:bg-raise/60">
+    <li className="row animate-rise group flex items-start gap-3 py-2.5">
       <button
         type="button"
         aria-pressed={voted}
@@ -100,7 +100,7 @@ function IdeaRow({ idea, me, dispatch }: IdeaRowProps) {
       <button
         type="button"
         onClick={() => dispatch({ type: "idea/lock", id: idea.id })}
-        className="shrink-0 pt-0.5 text-xs text-mute opacity-0 transition-opacity hover:text-ink focus-visible:opacity-100 group-hover:opacity-100"
+        className="reveal shrink-0 pt-0.5 text-xs text-mute opacity-0 transition-opacity hover:text-ink focus-visible:opacity-100 group-hover:opacity-100"
       >
         Lock in
       </button>
