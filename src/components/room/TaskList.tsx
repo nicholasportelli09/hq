@@ -14,6 +14,8 @@ interface TaskListProps {
   members: Readonly<Record<string, Member>>;
   me: Member;
   dispatch: (action: Action) => void;
+  /** Deleting goes through the room so it can offer undo. */
+  onRemove: (task: Task) => void;
 }
 
 /** Move focus between task rows. Exported for the global j/k shortcuts. */
@@ -25,7 +27,7 @@ export function focusTaskRow(from: Element | null, step: 1 | -1): void {
   rows[Math.min(rows.length - 1, Math.max(0, index + step))]?.focus();
 }
 
-export function TaskList({ tasks, members, me, dispatch }: TaskListProps) {
+export function TaskList({ tasks, members, me, dispatch, onRemove }: TaskListProps) {
   const open = tasks.filter((t) => !t.done);
   const done = tasks.filter((t) => t.done);
 
@@ -56,6 +58,7 @@ export function TaskList({ tasks, members, me, dispatch }: TaskListProps) {
               owner={task.ownerId ? members[task.ownerId] : undefined}
               me={me}
               dispatch={dispatch}
+              onRemove={onRemove}
             />
           ))}
         </ul>
@@ -69,16 +72,17 @@ interface TaskRowProps {
   owner: Member | undefined;
   me: Member;
   dispatch: (action: Action) => void;
+  onRemove: (task: Task) => void;
 }
 
-function TaskRow({ task, owner, me, dispatch }: TaskRowProps) {
+function TaskRow({ task, owner, me, dispatch, onRemove }: TaskRowProps) {
   const mine = task.ownerId === me.id;
   const toggleDone = () => dispatch({ type: "task/done", id: task.id, done: !task.done });
   const toggleClaim = () =>
     dispatch({ type: "task/owner", id: task.id, ownerId: mine ? null : me.id });
   const remove = (row: HTMLElement) => {
     focusTaskRow(row, 1);
-    dispatch({ type: "task/remove", id: task.id });
+    onRemove(task);
   };
 
   const onKeyDown = (e: KeyboardEvent<HTMLLIElement>) => {
@@ -134,7 +138,7 @@ function TaskRow({ task, owner, me, dispatch }: TaskRowProps) {
         type="button"
         tabIndex={-1}
         onClick={(e) => remove(e.currentTarget.closest("li") as HTMLElement)}
-        className="reveal text-xs text-mute opacity-0 transition-opacity hover:text-signal group-hover:opacity-100 group-focus-visible:opacity-100"
+        className="reveal text-xs text-mute opacity-0 transition-opacity hover:text-ink group-hover:opacity-100 group-focus-visible:opacity-100"
       >
         Delete
       </button>
