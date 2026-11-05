@@ -49,3 +49,6 @@ next-env.d.ts
 
 # gauntlet loop artifacts (bar screenshots are third-party)
 /gauntlet/
+
+# supabase cli cache
+/supabase/.temp/
