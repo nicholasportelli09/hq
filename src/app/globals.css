@@ -57,8 +57,11 @@ body {
    makes the clock span the full content width at every viewport. */
 .clock {
   --extra-digits: 0;
+  /* Share of the content width the clock spans (1 = edge to edge). */
+  --clock-scale: 0.5;
   font-size: calc(
-    (min(100vw, var(--page-max)) - 2 * var(--gutter)) / (3.96 + var(--extra-digits) * 0.6)
+    var(--clock-scale) * (min(100vw, var(--page-max)) - 2 * var(--gutter)) /
+      (3.96 + var(--extra-digits) * 0.6)
   );
   font-weight: 500;
   line-height: 0.82;
